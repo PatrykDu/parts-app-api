@@ -35,7 +35,8 @@ class PublicVehicleAPITests(TestCase):
     """Test unaunthicated API requests."""
 
     def setUp(self) -> None:
-        self.client = APIClient()  # test client we can use for tests added to this class
+        # test client we can use for tests added to this class
+        self.client = APIClient()
 
     def test_auth_required(self):
         """Test auth is requied to call API"""
@@ -48,7 +49,7 @@ class PrivateVehicleAPITests(TestCase):
     """Test authenticated API requests."""
 
     def setUp(self) -> None:
-        self.client = APIClient()  # test client we can use for tests added to this class
+        self.client = APIClient()
         self.user = get_user_model().objects.create_user(
             'user@example.com',
             'testpass123'
