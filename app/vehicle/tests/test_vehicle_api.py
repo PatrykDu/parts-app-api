@@ -39,6 +39,11 @@ def create_vehicle(user, **params):
     return vehicle
 
 
+def create_user(**params):
+    """Create and return a new user."""
+    return get_user_model().objects.create_user(**params)
+
+
 class PublicVehicleAPITests(TestCase):
     """Test unaunthicated API requests."""
 
@@ -58,10 +63,7 @@ class PrivateVehicleAPITests(TestCase):
 
     def setUp(self) -> None:
         self.client = APIClient()
-        self.user = get_user_model().objects.create_user(
-            'user@example.com',
-            'testpass123'
-        )
+        self.user = create_user(email='user@example.com', password='test123')
         self.client.force_authenticate(self.user)
 
     def test_auth_required(self):
@@ -84,10 +86,8 @@ class PrivateVehicleAPITests(TestCase):
 
     def test_vehicle_list_limited_to_user(self):
         """Test list of vehicles is limited to authenticated user."""
-        other_user = get_user_model().objects.create_user(
-            'other@example.com',
-            'testpass123'
-        )
+        other_user = create_user(
+            email='other@example.com', password='test123')
         create_vehicle(user=other_user)
         create_vehicle(user=self.user)
 
@@ -107,3 +107,95 @@ class PrivateVehicleAPITests(TestCase):
 
         serializer = VehicleDetailSerializer(vehicle)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_vehicle(self):
+        """Test creating a vehicle"""
+        payload = {
+            'title': 'Sample vehicle',
+            'year': 2020,
+            'price': 150000
+        }
+        res = self.client.post(VEHICLES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        vehicle = Vehicle.objects.get(id=res.data['id'])
+        for k, v in payload.items():
+            self.assertEqual(getattr(vehicle, k), v)
+        self.assertEqual(vehicle.user, self.user)
+
+    def test_partial_update(self):
+        """Test partial update of a vehicle."""
+        original_link = 'https://example.com/vehicle.pdf'
+        vehicle = create_vehicle(
+            user=self.user,
+            title='Sample vehicle title',
+            link=original_link
+        )
+
+        payload = {'title': 'New vehicle title'}
+        url = detail_url(vehicle.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        vehicle.refresh_from_db()
+        self.assertEqual(vehicle.title, payload['title'])
+        self.assertEqual(vehicle.link, original_link)
+        self.assertEqual(vehicle.user, self.user)
+
+    def test_full_update(self):
+        """Test full update of vehicle."""
+        vehicle = create_vehicle(
+            user=self.user,
+            title='Sample vehicle title',
+            link='https://example.com/vehicle.pdf',
+            description='Sample vehicle description',
+        )
+
+        payload = {
+            'title': 'New vehicle title',
+            'link': 'https://example.com/new-vehicle.pdf',
+            'description': 'New sample vehicle description',
+            'year': 2022,
+            'price': 180000
+        }
+        url = detail_url(vehicle.id)
+        res = self.client.put(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        vehicle.refresh_from_db()
+        for k, v in payload.items():
+            self.assertEqual(getattr(vehicle, k), v)
+        self.assertEqual(vehicle.user, self.user)
+
+    def test_update_user_returns_error(self):
+        """Test changigng the vehicle user results in an error."""
+        new_user = create_user(email='user2@example.com', password='test123')
+        vehicle = create_vehicle(user=self.user)
+
+        payload = {'user': new_user.id}
+        url = detail_url(vehicle.id)
+        self.client.patch(url, payload)
+
+        vehicle.refresh_from_db()
+        self.assertEqual(vehicle.user, self.user)
+
+    def test_delete_vehicle(self):
+        """Test deleting a vehicle successful."""
+        vehicle = create_vehicle(user=self.user)
+
+        url = detail_url(vehicle.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Vehicle.objects.filter(id=vehicle.id).exists())
+
+    def test_vehicle_other_user_vehicle_error(self):
+        """Test trying to delete another users vehicle gives error."""
+        new_user = create_user(email='user2@example.com', password='test123')
+        vehicle = create_vehicle(user=new_user)
+
+        url = detail_url(Vehicle.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue(Vehicle.objects.filter(id=vehicle.id).exists())
