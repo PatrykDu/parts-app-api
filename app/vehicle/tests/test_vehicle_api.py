@@ -194,7 +194,7 @@ class PrivateVehicleAPITests(TestCase):
         new_user = create_user(email='user2@example.com', password='test123')
         vehicle = create_vehicle(user=new_user)
 
-        url = detail_url(Vehicle.id)
+        url = detail_url(vehicle.id)
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
