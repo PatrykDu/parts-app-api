@@ -57,7 +57,7 @@ class ModelTest(TestCase):
         )
         vehicle = models.Vehicle.objects.create(
             user=user,
-            title='Sample recipe name',
+            title='Sample vehicle name',
             year=1992,
             price=5,
             description='Sample vehicle description',

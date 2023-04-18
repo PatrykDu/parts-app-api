@@ -10,10 +10,18 @@ from rest_framework.test import APIClient
 
 from core.models import Vehicle
 
-from vehicle.serializers import VehicleSerializer
+from vehicle.serializers import (
+    VehicleSerializer,
+    VehicleDetailSerializer,
+)
 
 
 VEHICLES_URL = reverse('vehicle:vehicle-list')
+
+
+def detail_url(vehicle_id):
+    """Create and return a vehicle detail URL."""
+    return reverse('vehicle:vehicle-detail', args=[vehicle_id])
 
 
 def create_vehicle(user, **params):
@@ -75,7 +83,7 @@ class PrivateVehicleAPITests(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_vehicle_list_limited_to_user(self):
-        """Test list of recipes is limited to authenticated user."""
+        """Test list of vehicles is limited to authenticated user."""
         other_user = get_user_model().objects.create_user(
             'other@example.com',
             'testpass123'
@@ -88,4 +96,14 @@ class PrivateVehicleAPITests(TestCase):
         vehicles = Vehicle.objects.filter(user=self.user)
         serializer = VehicleSerializer(vehicles, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_get_vehicle_detail(self):
+        """Test get vehicle detail."""
+        vehicle = create_vehicle(user=self.user)
+
+        url = detail_url(vehicle.id)
+        res = self.client.get(url)
+
+        serializer = VehicleDetailSerializer(vehicle)
         self.assertEqual(res.data, serializer.data)
