@@ -4,6 +4,8 @@ Tests for models.
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
+from core import models
+
 
 class ModelTest(TestCase):
     """Test models."""
@@ -46,3 +48,19 @@ class ModelTest(TestCase):
 
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+    def test_create_vehicle(self):
+        """Test creating a vehicle is seccessful."""
+        user = get_user_model().objects.create_user(
+            'test@example.com',
+            'testpass123'
+        )
+        vehicle = models.Vehicle.objects.create(
+            user=user,
+            title='Sample recipe name',
+            year=1992,
+            price=5,
+            description='Sample vehicle description',
+        )
+
+        self.assertEqual(str(vehicle), f"{vehicle.year} {vehicle.title}")
