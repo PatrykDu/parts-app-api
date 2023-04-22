@@ -24,3 +24,8 @@
     - PUT - Update whole vehicle
     - PATCH - Update some fields of vehicle
     - DELETE - Delete vehicle
+ - **/vehicles/*tags**
+    - GET - List all tags
+    - POST - Create tag
+    - PUT/PATCH - Update tags
+    - DELETE - Delete tags
