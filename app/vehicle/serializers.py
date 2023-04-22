@@ -3,7 +3,10 @@ Serializers for the vehicle API view.
 """
 from rest_framework import serializers
 
-from core.models import Vehicle
+from core.models import (
+    Vehicle,
+    Tag,
+    )
 
 
 class VehicleSerializer(serializers.ModelSerializer):
@@ -20,3 +23,12 @@ class VehicleDetailSerializer(VehicleSerializer):
 
     class Meta(VehicleSerializer.Meta):
         fields = VehicleSerializer.Meta.fields + ['description']
+
+
+class TagSerializer(serializers.ModelSerializer):
+    """Serializer for tags."""
+
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
+        read_only_fields = ['id']
