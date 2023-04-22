@@ -57,6 +57,7 @@ class Vehicle(models.Model):
     price = models.IntegerField()
     link = models.CharField(max_length=255, blank=True)
     tags = models.ManyToManyField('Tag')
+    parts = models.ManyToManyField('Part')
 
     def __str__(self) -> str:
         return f"{self.year} {self.title}"
@@ -71,4 +72,17 @@ class Tag(models.Model):
     )
 
     def __str__(self) -> str:
+        return self.name
+
+
+class Part(models.Model):
+    """Part for recipes."""
+    name = models.CharField(max_length=255)
+    price = models.IntegerField()
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
         return self.name

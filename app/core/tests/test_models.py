@@ -76,3 +76,14 @@ class ModelTests(TestCase):
         tag = models.Tag.objects.create(user=user, name='Tag1')
 
         self.assertEqual(str(tag), tag.name)
+
+    def test_create_part(self):
+        """Test creating an part is successful."""
+        user = create_user()
+        part = models.Part.objects.create(
+            user=user,
+            name='part1',
+            price=200,
+        )
+
+        self.assertEqual(str(part), part.name)
