@@ -248,3 +248,43 @@ class PrivateVehicleAPITests(TestCase):
                 user=self.user,
             ).exists()
             self.assertTrue(exists)
+
+    def test_create_tag_on_update(self):
+        """Test create tag when updating a recipe."""
+        vehicle = create_vehicle(user=self.user)
+
+        payload = {'tags': [{'name': 'car'}]}
+        url = detail_url(vehicle.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        new_tag = Tag.objects.get(user=self.user, name='car')
+        self.assertIn(new_tag, vehicle.tags.all())
+
+    def test_update_vehicle_assign_tag(self):
+        """Test assigning an existing tag when updating a vehicle."""
+        tag_motorcycle = Tag.objects.create(user=self.user, name='modern')
+        vehicle = create_vehicle(user=self.user)
+        vehicle.tags.add(tag_motorcycle)
+
+        tag_classic = Tag.objects.create(user=self.user, name='classic')
+        payload = {'tags': [{'name': 'classic'}]}
+        url = detail_url(vehicle.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(tag_classic, vehicle.tags.all())
+        self.assertNotIn(tag_motorcycle, vehicle.tags.all())
+
+    def test_clear_vehicle_tags(self):
+        """Test clearing a vehicles tags."""
+        tag = Tag.objects.create(user=self.user, name='testtag')
+        vehicle = create_vehicle(user=self.user)
+        vehicle.tags.add(tag)
+
+        payload = {'tags': []}
+        url = detail_url(vehicle.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(vehicle.tags.count(), 0)
