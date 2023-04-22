@@ -14,6 +14,7 @@ from vehicle import views
 router = DefaultRouter()
 router.register('vehicles', views.VehicleViewSet)
 router.register('tags', views.TagViewSet)
+router.register('parts', views.PartViewSet)
 
 app_name = 'vehicle'
 

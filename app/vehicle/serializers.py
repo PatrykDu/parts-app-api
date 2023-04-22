@@ -6,7 +6,18 @@ from rest_framework import serializers
 from core.models import (
     Vehicle,
     Tag,
+    Part,
     )
+
+
+class PartSerializer(serializers.ModelSerializer):
+    """Serializer for parts."""
+
+    class Meta:
+        model = Part
+        fields = ['id', 'name', 'price']
+        read_only_fields = ['id']
+
 
 
 class TagSerializer(serializers.ModelSerializer):
