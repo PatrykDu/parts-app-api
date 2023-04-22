@@ -22,11 +22,11 @@ def create_user(**params):
 class PublicUserApiTests(TestCase):
     """Test the public features of the user API."""
 
-    def setUp(self) -> None:
+    def setUp(self):
         self.client = APIClient()
 
     def test_create_user_success(self):
-        """Test creating a user is successfull."""
+        """Test creating a user is successful."""
         payload = {
             'email': 'test@example.com',
             'password': 'testpass123',
@@ -57,7 +57,7 @@ class PublicUserApiTests(TestCase):
         payload = {
             'email': 'test@example.com',
             'password': 'pw',
-            'name': 'Test Name',
+            'name': 'Test name',
         }
         res = self.client.post(CREATE_USER_URL, payload)
 
@@ -70,9 +70,9 @@ class PublicUserApiTests(TestCase):
     def test_create_token_for_user(self):
         """Test generates token for valid credentials."""
         user_details = {
+            'name': 'Test Name',
             'email': 'test@example.com',
             'password': 'test-user-password123',
-            'name': 'Test Name',
         }
         create_user(**user_details)
 
@@ -90,6 +90,14 @@ class PublicUserApiTests(TestCase):
         create_user(email='test@example.com', password='goodpass')
 
         payload = {'email': 'test@example.com', 'password': 'badpass'}
+        res = self.client.post(TOKEN_URL, payload)
+
+        self.assertNotIn('token', res.data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_token_email_not_found(self):
+        """Test error returned if user not found for given email."""
+        payload = {'email': 'test@example.com', 'password': 'pass123'}
         res = self.client.post(TOKEN_URL, payload)
 
         self.assertNotIn('token', res.data)
@@ -113,7 +121,7 @@ class PublicUserApiTests(TestCase):
 class PrivateUserApiTests(TestCase):
     """Test API requests that require authentication."""
 
-    def setUp(self) -> None:
+    def setUp(self):
         self.user = create_user(
             email='test@example.com',
             password='testpass123',
