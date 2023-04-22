@@ -8,7 +8,10 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Vehicle
+from core.models import (
+    Vehicle,
+    Tag,
+)
 
 from vehicle.serializers import (
     VehicleSerializer,
@@ -199,3 +202,49 @@ class PrivateVehicleAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(Vehicle.objects.filter(id=vehicle.id).exists())
+
+    def test_create_vehicle_with_new_tags(self):
+        """Test creating a vehicle with new tags."""
+        payload = {
+            'title': 'BMW R100',
+            'year': 1980,
+            'price': 4000,
+            'tags': [{'name': 'Motorcycle'}, {'name': 'Classic'}],
+        }
+        res = self.client.post(VEHICLES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        vehicles = Vehicle.objects.filter(user=self.user)
+        self.assertEqual(vehicles.count(), 1)
+        vehicle = vehicles[0]
+        self.assertEqual(vehicle.tags.count(), 2)
+        for tag in payload['tags']:
+            exists = vehicle.tags.filter(
+                name=tag['name'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
+
+    def test_create_vehicle_with_existing_tags(self):
+        """Test creating a vehicle with existing tag."""
+        tag_car = Tag.objects.create(user=self.user, name='car')
+        payload = {
+            'title': 'Mazda MX-5',
+            'year': 1992,
+            'price': 12000,
+            'tags': [{'name': 'car'}, {'name': 'classic'}],
+        }
+        res = self.client.post(VEHICLES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        vehicles = Vehicle.objects.filter(user=self.user)
+        self.assertEqual(vehicles.count(), 1)
+        vehicle = vehicles[0]
+        self.assertEqual(vehicle.tags.count(), 2)
+        self.assertIn(tag_car, vehicle.tags.all())
+        for tag in payload['tags']:
+            exists = vehicle.tags.filter(
+                name=tag['name'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
