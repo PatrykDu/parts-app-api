@@ -19,7 +19,6 @@ class PartSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
 
-
 class TagSerializer(serializers.ModelSerializer):
     """Serializer for tags."""
 
