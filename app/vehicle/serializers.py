@@ -47,7 +47,7 @@ class VehicleSerializer(serializers.ModelSerializer):
         return vehicle
 
     def update(self, instance, validated_data):
-        """Update recipe."""
+        """Update vehicle."""
         tags = validated_data.pop('tags', None)
         if tags is not None:
             instance.tags.clear()

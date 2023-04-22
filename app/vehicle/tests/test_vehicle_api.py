@@ -250,7 +250,7 @@ class PrivateVehicleAPITests(TestCase):
             self.assertTrue(exists)
 
     def test_create_tag_on_update(self):
-        """Test create tag when updating a recipe."""
+        """Test create tag when updating a vehicle."""
         vehicle = create_vehicle(user=self.user)
 
         payload = {'tags': [{'name': 'car'}]}
