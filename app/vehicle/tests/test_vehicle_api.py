@@ -394,6 +394,47 @@ class PrivateVehicleAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(vehicle.parts.count(), 0)
 
+    def test_filter_by_tags(self):
+        """Test filtering vehicles by tags."""
+        v1 = create_vehicle(user=self.user, title='mx5', price=12000)
+        v2 = create_vehicle(user=self.user, title='r100', price=4000)
+        tag1 = Tag.objects.create(user=self.user, name='car')
+        tag2 = Tag.objects.create(user=self.user, name='motorcycle')
+        v1.tags.add(tag1)
+        v2.tags.add(tag2)
+        v3 = create_vehicle(user=self.user, title='ducati', price=10000)
+
+        params = {'tags': f'{tag1.id},{tag2.id}'}
+        res = self.client.get(VEHICLES_URL, params)
+
+        s1 = VehicleSerializer(v1)
+        s2 = VehicleSerializer(v2)
+        s3 = VehicleSerializer(v3)
+        self.assertIn(s1.data, res.data)
+        self.assertIn(s2.data, res.data)
+        self.assertNotIn(s3.data, res.data)
+
+    def test_filter_by_parts(self):
+        """Test filtering vehicles by parts."""
+        v1 = create_vehicle(user=self.user, title='mx5', price=12000)
+        v2 = create_vehicle(user=self.user, title='r100', price=4000)
+        part1 = Part.objects.create(
+            user=self.user, name='headlights', price=500)
+        part2 = Part.objects.create(user=self.user, name='engine', price=3000)
+        v1.parts.add(part1)
+        v2.parts.add(part2)
+        v3 = create_vehicle(user=self.user, title='ducati', price=10000)
+
+        params = {'parts': f'{part1.id},{part2.id}'}
+        res = self.client.get(VEHICLES_URL, params)
+
+        s1 = VehicleSerializer(v1)
+        s2 = VehicleSerializer(v2)
+        s3 = VehicleSerializer(v3)
+        self.assertIn(s1.data, res.data)
+        self.assertIn(s2.data, res.data)
+        self.assertNotIn(s3.data, res.data)
+
 
 class ImageUploadTests(TestCase):
     """Tests for the image upload API."""
