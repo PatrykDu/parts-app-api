@@ -54,7 +54,8 @@ class TagViewSet(mixins.DestroyModelMixin,
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
 
-class PartViewSet(mixins.UpdateModelMixin,
+class PartViewSet(mixins.DestroyModelMixin,
+                  mixins.UpdateModelMixin,
                   mixins.ListModelMixin,
                   viewsets.GenericViewSet):
     """Manage parts in the database."""

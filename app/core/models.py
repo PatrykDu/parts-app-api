@@ -76,7 +76,7 @@ class Tag(models.Model):
 
 
 class Part(models.Model):
-    """Part for recipes."""
+    """Part for vehicles."""
     name = models.CharField(max_length=255)
     price = models.IntegerField()
     user = models.ForeignKey(

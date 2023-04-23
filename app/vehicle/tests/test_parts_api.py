@@ -87,3 +87,14 @@ class PrivatePartsApiTests(TestCase):
         part.refresh_from_db()
         self.assertEqual(part.name, payload['name'])
         self.assertEqual(part.price, payload['price'])
+
+    def test_delete_part(self):
+        """Test deleting an part."""
+        part = Part.objects.create(user=self.user, name='exhaust', price=1500)
+
+        url = detail_url(part.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        parts = Part.objects.filter(user=self.user)
+        self.assertFalse(parts.exists())
