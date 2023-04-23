@@ -59,7 +59,6 @@ class VehicleSerializer(serializers.ModelSerializer):
             )
             vehicle.parts.add(part_obj)
 
-
     def create(self, validated_data):
         """Create a vehicle."""
         tags = validated_data.pop('tags', [])
@@ -73,9 +72,14 @@ class VehicleSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """Update vehicle."""
         tags = validated_data.pop('tags', None)
+        parts = validated_data.pop('parts', None)
         if tags is not None:
             instance.tags.clear()
             self._get_or_create_tags(tags, instance)
+
+        if parts is not None:
+            instance.parts.clear()
+            self._get_or_create_parts(parts, instance)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

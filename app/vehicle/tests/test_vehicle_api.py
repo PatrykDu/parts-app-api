@@ -343,3 +343,43 @@ class PrivateVehicleAPITests(TestCase):
                 price=part['price'],
             ).exists()
             self.assertTrue(exists)
+
+    def test_create_part_on_update(self):
+        """Test creating an part when updating a vehicle."""
+        vehicle = create_vehicle(user=self.user)
+
+        payload = {'parts': [{'name': 'gearbox', 'price': 500}]}
+        url = detail_url(vehicle.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        new_part = Part.objects.get(user=self.user, name='gearbox', price=500)
+        self.assertIn(new_part, vehicle.parts.all())
+
+    def test_update_vehicle_assign_part(self):
+        """Test assigning an existing part when updating a vehicle."""
+        part1 = Part.objects.create(user=self.user, name='wheels', price=1500)
+        vehicle = create_vehicle(user=self.user)
+        vehicle.parts.add(part1)
+
+        part2 = Part.objects.create(user=self.user, name='Tyres', price=400)
+        payload = {'parts': [{'name': 'Tyres', 'price': 400}]}
+        url = detail_url(vehicle.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(part2, vehicle.parts.all())
+        self.assertNotIn(part1, vehicle.parts.all())
+
+    def test_clear_vehicle_ingredients(self):
+        """Test clearing a vehicles parts."""
+        part = Part.objects.create(user=self.user, name='Fenders', price=300)
+        vehicle = create_vehicle(user=self.user)
+        vehicle.parts.add(part)
+
+        payload = {'parts': []}
+        url = detail_url(vehicle.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(vehicle.parts.count(), 0)
