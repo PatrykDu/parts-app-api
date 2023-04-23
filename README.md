@@ -14,7 +14,7 @@
     - PUT - Update whole user
     - PATCH - Update some fields of user
 ## /api/vehicle
- - **/vehicle/vehicles**
+ - **/vehicle/vehicles/**
     - GET - List all vehicles
          
    ###
