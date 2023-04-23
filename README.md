@@ -46,8 +46,8 @@
     - GET - List all parts
    ###
          Flag parameters in request for filtering:
-         assigned_only=0    - show all
-         assigned_only=1    - show only assigned to vehicle
+         assigned_only=0    - show all parts assigned and unassigned to vehicle
+         assigned_only=1    - show parts only assigned to any vehicle
 
     - POST - Create part
  - **/vehicles/parts/*<part_id>*/**
