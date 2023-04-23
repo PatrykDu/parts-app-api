@@ -57,3 +57,9 @@
     - PUT - Update whole part
     - PATCH - Update some fields of part
     - DELETE - Delete part
+
+#
+#
+
+# Swagger UI Schema:
+![Swagger Schema](https://github.com/PatrykDu/parts-app-api/blob/main/.github/pictures/API_schema.png?raw=true)
