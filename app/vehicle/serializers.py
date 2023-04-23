@@ -93,3 +93,13 @@ class VehicleDetailSerializer(VehicleSerializer):
 
     class Meta(VehicleSerializer.Meta):
         fields = VehicleSerializer.Meta.fields + ['description']
+
+
+class VehicleImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to vehicles."""
+
+    class Meta:
+        model = Vehicle
+        fields = ['id', 'image']
+        read_only_fields = ['id']
+        extra_kwargs = {'image': {'required': 'True'}}

@@ -1,6 +1,9 @@
 """
 Database models.
 """
+import uuid
+import os
+
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import (
@@ -8,6 +11,14 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin
 )
+
+
+def vehicle_image_file_path(instance, filename):
+    """Generate file path for new vehicle image."""
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{ext}'
+
+    return os.path.join('uploads', 'vehicle', filename)
 
 
 class UserManager(BaseUserManager):
@@ -58,6 +69,7 @@ class Vehicle(models.Model):
     link = models.CharField(max_length=255, blank=True)
     tags = models.ManyToManyField('Tag')
     parts = models.ManyToManyField('Part')
+    image = models.ImageField(null=True, upload_to=vehicle_image_file_path)
 
     def __str__(self) -> str:
         return f"{self.year} {self.title}"

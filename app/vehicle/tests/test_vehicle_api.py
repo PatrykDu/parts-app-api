@@ -1,6 +1,11 @@
 """
 Tests for vehicle APIs.
 """
+import tempfile
+import os
+
+from PIL import Image
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -26,6 +31,11 @@ VEHICLES_URL = reverse('vehicle:vehicle-list')
 def detail_url(vehicle_id):
     """Create and return a vehicle detail URL."""
     return reverse('vehicle:vehicle-detail', args=[vehicle_id])
+
+
+def image_upload_url(vehicle_id):
+    """Create and return an image upload URL."""
+    return reverse('vehicle:vehicle-upload-image', args=[vehicle_id])
 
 
 def create_vehicle(user, **params):
@@ -371,7 +381,7 @@ class PrivateVehicleAPITests(TestCase):
         self.assertIn(part2, vehicle.parts.all())
         self.assertNotIn(part1, vehicle.parts.all())
 
-    def test_clear_vehicle_ingredients(self):
+    def test_clear_vehicle_parts(self):
         """Test clearing a vehicles parts."""
         part = Part.objects.create(user=self.user, name='Fenders', price=300)
         vehicle = create_vehicle(user=self.user)
@@ -383,3 +393,42 @@ class PrivateVehicleAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(vehicle.parts.count(), 0)
+
+
+class ImageUploadTests(TestCase):
+    """Tests for the image upload API."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            'user@example.com',
+            'password123',
+        )
+        self.client.force_authenticate(self.user)
+        self.vehicle = create_vehicle(user=self.user)
+
+    def tearDown(self):
+        self.vehicle.image.delete()
+
+    def test_upload_image(self):
+        """Test uploading an image to a vehicle."""
+        url = image_upload_url(self.vehicle.id)
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as image_file:
+            img = Image.new('RGB', (10, 10))
+            img.save(image_file, format='JPEG')
+            image_file.seek(0)
+            payload = {'image': image_file}
+            res = self.client.post(url, payload, format='multipart')
+
+        self.vehicle.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('image', res.data)
+        self.assertTrue(os.path.exists(self.vehicle.image.path))
+
+    def test_upload_image_bad_request(self):
+        """Test uploading an invalid image."""
+        url = image_upload_url(self.vehicle.id)
+        payload = {'image': 'notanimage'}
+        res = self.client.post(url, payload, format='multipart')
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
