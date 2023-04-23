@@ -92,7 +92,7 @@ class VehicleDetailSerializer(VehicleSerializer):
     """Serializer for vehicle detail view"""
 
     class Meta(VehicleSerializer.Meta):
-        fields = VehicleSerializer.Meta.fields + ['description']
+        fields = VehicleSerializer.Meta.fields + ['description', 'image']
 
 
 class VehicleImageSerializer(serializers.ModelSerializer):
