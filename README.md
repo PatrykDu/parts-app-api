@@ -2,7 +2,6 @@
 
 **DRF (Django REST Framework) API used to store information about tuned vehicles. Multiple users can store information about their vehicles with photos and installed parts along with all costs.**
 
-#
 ### [Swagger API Schema](https://github.com/PatrykDu/parts-app-api#swagger-ui-schema "Heading link")
 #
 # Endpoints
