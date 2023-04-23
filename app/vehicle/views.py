@@ -39,13 +39,11 @@ class VehicleViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class TagViewSet(mixins.DestroyModelMixin,
-                 mixins.UpdateModelMixin,
-                 mixins.ListModelMixin,
-                 viewsets.GenericViewSet):
-    """Manage tags in the database."""
-    serializer_class = serializers.TagSerializer
-    queryset = Tag.objects.all()
+class BaseVehicleAttrViewSet(mixins.DestroyModelMixin,
+                             mixins.UpdateModelMixin,
+                             mixins.ListModelMixin,
+                             viewsets.GenericViewSet):
+    """Base viewset for vehicle attributes."""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -54,16 +52,13 @@ class TagViewSet(mixins.DestroyModelMixin,
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
 
-class PartViewSet(mixins.DestroyModelMixin,
-                  mixins.UpdateModelMixin,
-                  mixins.ListModelMixin,
-                  viewsets.GenericViewSet):
+class TagViewSet(BaseVehicleAttrViewSet):
+    """Manage tags in the database."""
+    serializer_class = serializers.TagSerializer
+    queryset = Tag.objects.all()
+
+
+class PartViewSet(BaseVehicleAttrViewSet):
     """Manage parts in the database."""
     serializer_class = serializers.PartSerializer
     queryset = Part.objects.all()
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Filter queryset to authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-price')
