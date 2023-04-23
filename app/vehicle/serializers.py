@@ -32,10 +32,11 @@ class VehicleSerializer(serializers.ModelSerializer):
     """Serializer for vehicles."""
     # many means it will be a list of tags
     tags = TagSerializer(many=True, required=False)
+    parts = PartSerializer(many=True, required=False)
 
     class Meta:
         model = Vehicle
-        fields = ['id', 'title', 'year', 'price', 'link', 'tags']
+        fields = ['id', 'title', 'year', 'price', 'link', 'tags', 'parts', ]
         read_only_fields = ['id']
 
     def _get_or_create_tags(self, tags, vehicle):
@@ -48,11 +49,24 @@ class VehicleSerializer(serializers.ModelSerializer):
             )
             vehicle.tags.add(tag_obj)
 
+    def _get_or_create_parts(self, parts, vehicle):
+        """Handle getting or creating parts as needed."""
+        auth_user = self.context['request'].user
+        for part in parts:
+            part_obj, created = Part.objects.get_or_create(
+                user=auth_user,
+                **part,
+            )
+            vehicle.parts.add(part_obj)
+
+
     def create(self, validated_data):
         """Create a vehicle."""
         tags = validated_data.pop('tags', [])
+        parts = validated_data.pop('parts', [])
         vehicle = Vehicle.objects.create(**validated_data)
         self._get_or_create_tags(tags, vehicle)
+        self._get_or_create_parts(parts, vehicle)
 
         return vehicle
 

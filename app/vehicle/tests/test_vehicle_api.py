@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 from core.models import (
     Vehicle,
     Tag,
+    Part
 )
 
 from vehicle.serializers import (
@@ -288,3 +289,57 @@ class PrivateVehicleAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(vehicle.tags.count(), 0)
+
+    def test_create_vehicle_with_new_parts(self):
+        """Test creating a vehicle with new parts."""
+        payload = {
+            'title': 'Mazda MX-5',
+            'year': 1992,
+            'price': 12000,
+            'parts': [
+                {'name': 'exhaust', 'price': 1500},
+                {'name': 'wheels', 'price': 1500}
+            ],
+        }
+        res = self.client.post(VEHICLES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        vehicles = Vehicle.objects.filter(user=self.user)
+        self.assertEqual(vehicles.count(), 1)
+        vehicle = vehicles[0]
+        self.assertEqual(vehicle.parts.count(), 2)
+        for part in payload['parts']:
+            exists = vehicle.parts.filter(
+                name=part['name'],
+                price=part['price'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
+
+    def test_create_vehicle_with_existing_part(self):
+        """Test creating a new vehicle with existing part."""
+        part = Part.objects.create(user=self.user, name='Kardan', price=1000)
+        payload = {
+            'title': 'BMW R100',
+            'year': 1991,
+            'price': 5000,
+            'parts': [
+                {'name': 'Kardan', 'price': 1000},
+                {'name': 'Engine', 'price': 1500}
+            ],
+        }
+        res = self.client.post(VEHICLES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        vehicles = Vehicle.objects.filter(user=self.user)
+        self.assertEqual(vehicles.count(), 1)
+        vehicle = vehicles[0]
+        self.assertEqual(vehicle.parts.count(), 2)
+        self.assertIn(part, vehicle.parts.all())
+        for part in payload['parts']:
+            exists = vehicle.parts.filter(
+                name=part['name'],
+                user=self.user,
+                price=part['price'],
+            ).exists()
+            self.assertTrue(exists)
