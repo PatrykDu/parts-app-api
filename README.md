@@ -13,8 +13,8 @@
     - GET - View profile
     - PUT - Update whole user
     - PATCH - Update some fields of user
-## /api/vehicles
- - **/vehicles/**
+## /api/vehicle
+ - **/vehicle/vehicles**
     - GET - List all vehicles
          
    ###
@@ -25,14 +25,14 @@
     - POST - Create vehicle
    
 
- - **/vehicles/*<vehicle_id>*/**
+ - **/vehicle/*<vehicle_id>*/**
     - GET - View details of vehicle
     - PUT - Update whole vehicle
     - PATCH - Update some fields of vehicle
     - DELETE - Delete vehicle
- - **/vehicles/parts/*<vehicle_id>*/upload-image/**
+ - **/vehicle/parts/*<vehicle_id>*/upload-image/**
     - POST - Upload image
- - **/vehicles/tags/**
+ - **/vehicle/tags/**
     - GET - List all tags
    ###
          Flag parameters in request for filtering:
@@ -42,7 +42,7 @@
     - POST - Create tag
     - PUT/PATCH - Update tags
     - DELETE - Delete tags
- - **/vehicles/parts/**
+ - **/vehicle/parts/**
     - GET - List all parts
    ###
          Flag parameters in request for filtering:
@@ -50,7 +50,7 @@
          assigned_only=1    - show parts only assigned to any vehicle
 
     - POST - Create part
- - **/vehicles/parts/*<part_id>*/**
+ - **/vehicle/parts/*<part_id>*/**
     - GET - View details of part
     - PUT - Update whole part
     - PATCH - Update some fields of part
