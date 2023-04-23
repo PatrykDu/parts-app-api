@@ -9,9 +9,9 @@
 ## /api/user
  - **/user/create/**
    - POST - Register a new user
- - **/user/token**
+ - **/user/token/**
     - POST - Create new token
- - **/user/me**
+ - **/user/me/**
     - GET - View profile
     - PUT - Update whole user
     - PATCH - Update some fields of user
@@ -24,12 +24,14 @@
     - PUT - Update whole vehicle
     - PATCH - Update some fields of vehicle
     - DELETE - Delete vehicle
- - **/vehicles/tags**
+ - **/vehicles/parts/*<vehicle_id>*/upload-image/**
+    - POST - Upload image
+ - **/vehicles/tags/**
     - GET - List all tags
     - POST - Create tag
     - PUT/PATCH - Update tags
     - DELETE - Delete tags
- - **/vehicles/parts**
+ - **/vehicles/parts/**
     - GET - List all parts
     - POST - Create part
  - **/vehicles/parts/*<part_id>*/**
