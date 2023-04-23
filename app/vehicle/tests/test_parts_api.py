@@ -8,7 +8,10 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Part
+from core.models import (
+    Vehicle,
+    Part,
+)
 
 from vehicle.serializers import PartSerializer
 
@@ -98,3 +101,46 @@ class PrivatePartsApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         parts = Part.objects.filter(user=self.user)
         self.assertFalse(parts.exists())
+
+    def test_filter_parts_assigned_to_vehicles(self):
+        """Test listing parts to those assigned to vehicles."""
+        part1 = Part.objects.create(
+            user=self.user, name='headlights', price=500)
+        part2 = Part.objects.create(user=self.user, name='engine', price=3000)
+        vehicle = Vehicle.objects.create(
+            title='mx5',
+            year=1992,
+            price=12000,
+            user=self.user,
+        )
+        vehicle.parts.add(part1)
+
+        res = self.client.get(PARTS_URL, {'assigned_only': 1})
+
+        s1 = PartSerializer(part1)
+        s2 = PartSerializer(part2)
+        self.assertIn(s1.data, res.data)
+        self.assertNotIn(s2.data, res.data)
+
+    def test_filtered_parts_unique(self):
+        """Test filtered parts returns a unique list."""
+        part = Part.objects.create(user=self.user, name='wheels', price=1500)
+        Part.objects.create(user=self.user, name='turbo', price=400)
+        vehicle1 = Vehicle.objects.create(
+            title='mx5',
+            year=1992,
+            price=12000,
+            user=self.user,
+        )
+        vehicle2 = Vehicle.objects.create(
+            title='r100',
+            year=1991,
+            price=5000,
+            user=self.user,
+        )
+        vehicle1.parts.add(part)
+        vehicle2.parts.add(part)
+
+        res = self.client.get(PARTS_URL, {'assigned_only': 1})
+
+        self.assertEqual(len(res.data), 1)
