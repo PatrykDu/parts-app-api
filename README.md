@@ -29,3 +29,11 @@
     - POST - Create tag
     - PUT/PATCH - Update tags
     - DELETE - Delete tags
+ - **/vehicles/parts**
+    - GET - List all parts
+    - POST - Create tag
+ - **/vehicles/parts/*<part_id>*/**
+    - GET - View details of part
+    - PUT - Update whole tag
+    - PATCH - Update some fields of part
+    - DELETE - Delete part
